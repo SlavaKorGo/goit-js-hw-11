@@ -30,33 +30,30 @@ async function fetchImages() {
   if (query === '') {
     return;
   }
-  await fetcherOfImages
-    .getImages(query)
-    .then(({ data }) => {
-      if (data.hits.length === 0) {
-        galleryRef.innerHTML = '';
-        return Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      }
-      if (fetcherOfImages.page === 1) {
-        galleryRef.innerHTML = renderGallery(data.hits);
-        Notify.success(`Hooray! We found ${data.totalHits} images.`);
-      } else {
-        galleryRef.insertAdjacentHTML('beforeend', renderGallery(data.hits));
-        setScrollbehavior();
-      }
-    })
-    .catch(error => {
-      if (error.response.status === 400) {
-        Notify.info(
-          "We're sorry, but you've reached the end of search results."
-        );
-      } else {
-        Notify.failure('Something went wrong. Try again!');
-      }
-    });
-  simpleLightbox.refresh();
+  try {
+    const { data } = await fetcherOfImages.getImages(query);
+    if (data.hits.length === 0) {
+      // galleryRef.innerHTML = '';
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+      return;
+    }
+    if (fetcherOfImages.page === 1) {
+      galleryRef.innerHTML = renderGallery(data.hits);
+      Notify.success(`Hooray! We found ${data.totalHits} images.`);
+    } else {
+      galleryRef.insertAdjacentHTML('beforeend', renderGallery(data.hits));
+      setScrollbehavior();
+    }
+    simpleLightbox.refresh();
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      Notify.info("We're sorry, but you've reached the end of search results.");
+    } else {
+      Notify.failure('Something went wrong. Try again!');
+    }
+  }
 }
 
 function initializeSimpleLightbox() {
