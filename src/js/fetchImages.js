@@ -32,3 +32,4 @@ export class FetcherOfImages {
     return response;
   }
 }
+

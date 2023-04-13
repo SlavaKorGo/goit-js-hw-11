@@ -1,4 +1,3 @@
-
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -25,14 +24,19 @@ function onSubmitForm(e) {
   fetchImages();
 }
 
+let reachedLastPage = false;
 async function fetchImages() {
   const query = searchFormRef.elements.searchQuery.value.trim();
   if (query === '') {
     return;
   }
   try {
+    if (reachedLastPage) {
+      return;
+    }
     const { data } = await fetcherOfImages.getImages(query);
-    if (data.hits.length === 0) {
+    const lastPage = Math.ceil(data.totalHits / 40);
+    if (data.totalHits === 0) {
       // galleryRef.innerHTML = '';
       Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
@@ -47,6 +51,10 @@ async function fetchImages() {
       setScrollbehavior();
     }
     simpleLightbox.refresh();
+    if (fetcherOfImages.page >= lastPage) {
+      reachedLastPage = false;
+      Notify.failure("We're sorry, but you've reached the end of search results.");
+    }
   } catch (error) {
     if (error.response && error.response.status === 400) {
       Notify.info("We're sorry, but you've reached the end of search results.");
@@ -118,4 +126,3 @@ function intersectingHandler(entries) {
     }
   });
 }
-
