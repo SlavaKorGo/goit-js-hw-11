@@ -46,15 +46,17 @@ async function fetchImages() {
     if (fetcherOfImages.page === 1) {
       galleryRef.innerHTML = renderGallery(data.hits);
       Notify.success(`Hooray! We found ${data.totalHits} images.`);
+    }  if (fetcherOfImages.page === lastPage) {
+      console.log(fetcherOfImages.page, lastPage);
+      // reachedLastPage = true;
+      Notify.failure("We're sorry, but you've reached the end of search results.");
+      return;
     } else {
       galleryRef.insertAdjacentHTML('beforeend', renderGallery(data.hits));
       setScrollbehavior();
     }
     simpleLightbox.refresh();
-    if (fetcherOfImages.page >= lastPage) {
-      reachedLastPage = false;
-      Notify.failure("We're sorry, but you've reached the end of search results.");
-    }
+   
   } catch (error) {
     if (error.response && error.response.status === 400) {
       Notify.info("We're sorry, but you've reached the end of search results.");
